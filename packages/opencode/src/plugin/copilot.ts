@@ -64,7 +64,6 @@ export async function CopilotAuthPlugin(input: PluginInput): Promise<Hooks> {
           async fetch(request: RequestInfo | URL, init?: RequestInit) {
             const info = await getAuth()
             if (info.type !== "oauth") return fetch(request, init)
-
             const url = request instanceof URL ? request.href : request.toString()
             const { isVision, isAgent } = iife(() => {
               try {
@@ -78,7 +77,7 @@ export async function CopilotAuthPlugin(input: PluginInput): Promise<Hooks> {
                       (msg: any) =>
                         Array.isArray(msg.content) && msg.content.some((part: any) => part.type === "image_url"),
                     ),
-                    isAgent: last?.role !== "user",
+                    isAgent: body.messages.length !== 2,
                   }
                 }
 
@@ -90,7 +89,7 @@ export async function CopilotAuthPlugin(input: PluginInput): Promise<Hooks> {
                       (item: any) =>
                         Array.isArray(item?.content) && item.content.some((part: any) => part.type === "input_image"),
                     ),
-                    isAgent: last?.role !== "user",
+                    isAgent: body.input.length !== 2,
                   }
                 }
 
@@ -112,7 +111,7 @@ export async function CopilotAuthPlugin(input: PluginInput): Promise<Hooks> {
                               part.content.some((nested: any) => nested?.type === "image")),
                         ),
                     ),
-                    isAgent: !(last?.role === "user" && hasNonToolCalls),
+                    isAgent: body.messages.length !== 2,
                   }
                 }
               } catch {}
